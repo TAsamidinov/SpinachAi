@@ -16,4 +16,10 @@ build/
 
 # Jar files
 *.jar
-*.war
+*.war# H2 database files
+*.db
+*.mv.db
+*.trace.db
+
+# macOS
+.DS_Store
