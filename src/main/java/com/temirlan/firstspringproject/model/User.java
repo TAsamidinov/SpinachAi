@@ -3,13 +3,13 @@ package com.temirlan.firstspringproject.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.NoArgsConstructor;  // add this import
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "users")
 @Getter
 @Setter
-@NoArgsConstructor   // add this line
+@NoArgsConstructor
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
