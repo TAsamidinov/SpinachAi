@@ -4,8 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.temirlan.firstspringproject.controller.AuthController;
 import com.temirlan.firstspringproject.dto.LoginDto;
 import com.temirlan.firstspringproject.dto.UserRegistrationDto;
+import com.temirlan.firstspringproject.exception.UserNotFoundException;
+import com.temirlan.firstspringproject.exception.UsernameAlreadyTakenException;
 import com.temirlan.firstspringproject.model.User;
 import com.temirlan.firstspringproject.service.UserService;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -60,22 +63,21 @@ class AuthControllerTest {
     }
 
     @Test
-    void register_UsernameAlreadyTaken() throws Exception {
-        // ARRANGE
+        void register_UsernameAlreadyTaken() throws Exception {
         UserRegistrationDto dto = new UserRegistrationDto();
         dto.setUsername("temirlan");
         dto.setPassword("hello123");
 
-        when(userService.registerUser(any(UserRegistrationDto.class)))
-                .thenThrow(new RuntimeException("Username already taken: temirlan"));
+       when(userService.registerUser(any(UserRegistrationDto.class)))
+    .thenThrow(new UsernameAlreadyTakenException("Username already taken: temirlan"));
 
-        // ACT & ASSERT
         mockMvc.perform(post("/api/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isConflict())
-                .andExpect(content().string("Username already taken: temirlan"));
-    }
+                // now expects JSON not plain text
+                .andExpect(jsonPath("$.error").value("Username already taken: temirlan"));
+        }
 
     @Test
     void login_Success() throws Exception {
@@ -122,20 +124,18 @@ class AuthControllerTest {
     }
 
     @Test
-    void login_UserNotFound() throws Exception {
-        // ARRANGE
+        void login_UserNotFound() throws Exception {
         LoginDto dto = new LoginDto();
         dto.setUsername("nobody");
         dto.setPassword("hello123");
 
         when(userService.findByUsername("nobody"))
-                .thenThrow(new RuntimeException("User not found: nobody"));
+                .thenThrow(new UserNotFoundException("User not found: nobody"));
 
-        // ACT & ASSERT
         mockMvc.perform(post("/api/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string("User not found: nobody"));
-    }
+                .andExpect(jsonPath("$.error").value("User not found: nobody"));
+        }
 }
