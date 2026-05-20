@@ -7,6 +7,7 @@ import com.temirlan.firstspringproject.dto.UserRegistrationDto;
 import com.temirlan.firstspringproject.exception.UserNotFoundException;
 import com.temirlan.firstspringproject.exception.UsernameAlreadyTakenException;
 import com.temirlan.firstspringproject.model.User;
+import com.temirlan.firstspringproject.security.JwtUtil;
 import com.temirlan.firstspringproject.service.UserService;
 
 import org.junit.jupiter.api.Test;
@@ -37,6 +38,9 @@ class AuthControllerTest {
 
     @MockBean
     private UserService userService;
+
+    @MockBean
+    private JwtUtil jwtUtil; 
 
     @MockBean
     private PasswordEncoder passwordEncoder;
