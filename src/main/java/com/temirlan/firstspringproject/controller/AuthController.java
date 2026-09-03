@@ -1,8 +1,10 @@
 package com.temirlan.firstspringproject.controller;
 
+import com.temirlan.firstspringproject.dto.AuthResponseDto;
 import com.temirlan.firstspringproject.dto.LoginDto;
 import com.temirlan.firstspringproject.dto.UserRegistrationDto;
 import com.temirlan.firstspringproject.model.User;
+import com.temirlan.firstspringproject.security.JwtUtil;
 import com.temirlan.firstspringproject.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +20,7 @@ public class AuthController {
 
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@Valid @RequestBody UserRegistrationDto dto) {
@@ -27,14 +30,17 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginDto dto) {
+    public ResponseEntity<?> login(@RequestBody LoginDto dto) {
         User user = userService.findByUsername(dto.getUsername());
+
         boolean passwordMatches = passwordEncoder.matches(
                 dto.getPassword(),
                 user.getPasswordHash()
         );
+
         if (passwordMatches) {
-            return ResponseEntity.ok("Login successful!");
+            String token = jwtUtil.generateToken(user.getUsername());
+            return ResponseEntity.ok(new AuthResponseDto(token, user.getUsername()));
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body("Invalid password!");

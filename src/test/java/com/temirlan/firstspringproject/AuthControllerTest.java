@@ -84,26 +84,26 @@ class AuthControllerTest {
         }
 
     @Test
-    void login_Success() throws Exception {
-        // ARRANGE
-        LoginDto dto = new LoginDto();
-        dto.setUsername("temirlan");
-        dto.setPassword("hello123");
+void login_Success() throws Exception {
+    LoginDto dto = new LoginDto();
+    dto.setUsername("temirlan");
+    dto.setPassword("hello123");
 
-        User user = new User();
-        user.setUsername("temirlan");
-        user.setPasswordHash("hashedPassword");
+    User user = new User();
+    user.setUsername("temirlan");
+    user.setPasswordHash("hashedPassword");
 
-        when(userService.findByUsername("temirlan")).thenReturn(user);
-        when(passwordEncoder.matches("hello123", "hashedPassword")).thenReturn(true);
+    when(userService.findByUsername("temirlan")).thenReturn(user);
+    when(passwordEncoder.matches("hello123", "hashedPassword")).thenReturn(true);
+    when(jwtUtil.generateToken("temirlan")).thenReturn("fake-jwt-token");
 
-        // ACT & ASSERT
-        mockMvc.perform(post("/api/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isOk())
-                .andExpect(content().string("Login successful!"));
-    }
+    mockMvc.perform(post("/api/auth/login")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(dto)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.token").value("fake-jwt-token"))
+            .andExpect(jsonPath("$.username").value("temirlan"));
+}
 
     @Test
     void login_WrongPassword() throws Exception {
